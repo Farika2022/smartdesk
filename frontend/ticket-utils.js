@@ -172,3 +172,129 @@ formatAllTickets(tickets).forEach((label) => console.log(label));
  
 console.log("\n── getTicketStats ────────────────────────");
 console.log(getTicketStats(tickets));
+
+// ------------- ASYNC Functions - talking to .NET backend -------------
+
+//fetchTickets()
+// async marks this functions as one that does something slow.
+// must mark a function async before using await inside it 
+// Without async , JS throws : "await is only valid in async functions"
+
+const fetchTickets = async () => {
+  try {
+    const response = await fetch ("http://localhost:5000/api/tickets");
+    
+    if (!response.ok){
+      throw new Error ("Server error:" + response.status);
+    }
+    const tickets = await response.json();
+    return tickets;
+  }
+  catch (error){
+    console.error("Failed to fetch tickets:", error.message);
+    return[];
+  }
+
+}
+
+// fetchTicketsById()
+// Clicking a ticket on the dashboard opens the detail view.
+// We only need ONE ticket — not all of them.
+// The .NET backend has a GET /api/tickets/:id endpoint for this.
+const fetchTicketsById = async ()=> {
+  try{
+    const response = await fetch (`http://localhost:5000/api/tickets/${ticketId}`);
+    
+    if (!response.ok){
+      throw new Error ("Ticket not found:" + ticketId);
+    }
+
+    const ticket= await response.json();
+    return ticket; // a single ticket object, not an array
+  
+  }
+  catch (error){
+       console.error("Failed to fetch ticket:", error.message);
+       return null; 
+  }
+};
+
+//submitTicket
+// GET = fetch data FROM the server (read only, no body).
+// POST = send data TO the server (creates something new).
+// The customer portal form calls this when submitted.
+// It sends the ticket data to the .NET backend.
+// The backend saves it to PostgreSQL and returns the saved ticket with a database ID.
+const submitTicket = async (customerName, email, subject)=>{
+  try{
+
+    const ticketData = createTicket (customerName,email,subject);
+    const response = await fetch ("http://localhost:5000/api/tickets",{
+       
+      // Default fetch method is GET. Must explicitly set POST.
+      method:"POST",
+     
+      //  Content-Type header: Tells the server- the body is JSON, not a form or plain text.
+      // Without this header, the .NET backend cannot read the body.
+      headers:{
+        "Content-Type":"application/json",
+      },
+      // fetch() cannot send a JavaScript object directly over the network.
+      // JSON.stringify converts { id: 1, customer: "Farika" }
+      // into the string '{"id":1,"customer":"Farika"}'.
+      // The server reads the string and converts it back to an object.
+      body:JSON.stringify(ticketData),
+    });
+
+    if (!response.ok){
+      throw new Error ("Submit failed:"+ response.status);
+    }
+     // The backend assigns a database ID (not our random one).
+    // The frontend uses this real ID to show the confirmation screen:
+    // "Your ticket #10042 has been submitted."
+      const savedTicket  =await response.json();
+      return savedTicket;
+    }
+    catch(error){
+      console.error("Failed to submit ticket:", error.message);
+      return null;
+    }
+  };
+
+// updateTicketStatus()
+// POST creates something new.
+// PATCH updates part of an existing record — just the status field.
+// PUT would replace the whole ticket. PATCH only touches what changed.
+
+const updateTicketStatus = async (ticketId,newStatus)=>{
+  try{
+    const response= await fetch (`http://localhost:5000/api/tickets/${ticketId}`, {
+    method :"PATCH",
+     headers:{
+        "Content-Type":"application/json",
+      },
+      body:JSON.stringify({status:newStatus}),
+  });
+  if (!response.ok){
+    throw new Error("Update failed:" + response.status);
+  }
+  const updated = await response.json();
+  return updated ;
+}
+  catch(error){
+       console.log("Failed to update ticket:",error.message);
+       return null;
+  }
+};
+ 
+// ── TEST ASYNC FUNCTIONS ─────────────────────────────────────
+// These will fail until the .NET backend is running.
+// That is expected. The functions are correct.
+// Uncomment and run once the backend is live on localhost:5000.
+ 
+// console.log("── fetchTickets ──────────────────────────");
+// fetchTickets().then(tickets => console.log("Fetched:", tickets.length));
+ 
+// console.log("── submitTicket ──────────────────────────");
+// submitTicket("Farika", "farika@test.com", "Test ticket")
+//   .then(saved => console.log("Saved:", saved));
