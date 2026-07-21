@@ -31,7 +31,7 @@ function App() {
 
     {/* Filter buttons */}
     <div style ={{display:"flex", gap :"8px", marginBottom:"16px"}}>
-      {["ALL", "HIGH", "MEDIUM", "LOW"]. map(f => {
+      {["ALL", "HIGH", "MEDIUM", "LOW"]. map(f => (
         <button
           key ={f}
           onClick={()=> setFilter(f)}
@@ -41,7 +41,7 @@ function App() {
           >
          {f}
         </button>
-      })}
+      ))}
     </div>
     {/*Ticket list- passes filtered tickets down as props*/}
     <TicketList tickets={visible}/>
