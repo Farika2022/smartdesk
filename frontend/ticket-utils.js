@@ -298,3 +298,4 @@ const updateTicketStatus = async (ticketId,newStatus)=>{
 // console.log("── submitTicket ──────────────────────────");
 // submitTicket("Farika", "farika@test.com", "Test ticket")
 //   .then(saved => console.log("Saved:", saved));
+export { tickets, getOpenTickets, getTicketStats, formatAllTickets, getTicketsByUrgency };
