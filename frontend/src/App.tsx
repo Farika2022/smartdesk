@@ -1,8 +1,9 @@
-import { useState,useEffect } from 'react'
+import { useState} from 'react'
 import TicketList from './components/TicketList'
 import TicketForm from './components/TicketForm'
-import {tickets as sampleTickets, getOpenTickets,getTicketStats} from "../ticket-utils"
-import './App.css'
+import {tickets as sampleTickets,getTicketStats} from "../ticket-utils"
+//import './App.css'
+import type { Ticket } from "./types/ticket";
 
 function App() {
   const [tickets, setTickets] = useState(sampleTickets);
@@ -19,7 +20,7 @@ function App() {
   // TicketForm calls onSubmit(newTicket) when submitted.
   // This function receives that ticket and adds it to the array.
 
-  const handleNewTicket = (newTicket) => {
+  const handleNewTicket = (newTicket:Ticket) => {
     setTickets([...tickets, newTicket]);
    // setView("dashboard"); // switch back to dashboard after submit
     setTimeout(() => {
@@ -56,7 +57,7 @@ function App() {
       <>
       {/* Stats row */}
    <div style = {{display: "flex", gap :"12px", marginBottom:"20px"}}>
-    {["total", "high", "medium", "low"].map(key => (
+    {(["total", "high", "medium", "low"]as const).map(key => (
        <div key={key} style={{ flex: 1, background: "#f1f5f9", padding: "12px", borderRadius: "8px", textAlign: "center" }}>
       <div style = {{fontSize:"22px", fontWeight: "bold"}}>{stats[key]}</div>
       <div style = {{fontSize:"12px", color: "#6b7280"}}>{key.toUpperCase()}</div>

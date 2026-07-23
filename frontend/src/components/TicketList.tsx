@@ -1,8 +1,12 @@
 // TicketList uses TicketCard to display each ticket.
 
 import TicketCard from "./TicketCard";
+import type { Ticket } from "../types/ticket";
 
-function TicketList({tickets}){
+interface TicketListProps{
+  tickets: Ticket[];
+}
+function TicketList({tickets}:TicketListProps){
    // Always handle the empty state. What does the user see
   // before data loads? A blank screen is confusing.
 

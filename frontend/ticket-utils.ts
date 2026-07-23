@@ -4,7 +4,8 @@
 // When React needs to display tickets, it imports from here.
 // When the .NET backend sends data back, this file processes it.
 // ============================================================
- 
+
+import type { Ticket, TicketStats } from "./src/types/ticket";
 
 // --- VARIABLES ---
 // CAPITALS = a global rule for the whole app.
@@ -27,7 +28,7 @@ const MAX_SUBJECT_LENGTH = 100;
 // When we connect to the real database, we replace this
 // array with a fetch() call. The rest of the code stays the same.
  
-const tickets = [
+const tickets: Ticket[] = [
   {
     id: 10001,
     customer: "Lars Nielsen",
@@ -77,7 +78,7 @@ const tickets = [
  
 // --- FUNCTIONS ---
  
-function createTicket(customerName,email,subject){
+function createTicket(customerName: string, email: string, subject: string): Ticket{
 
 // new Date() = right now as a Date object.
 // .toISOString() = "2026-07-17T10:30:00.000Z"
@@ -98,14 +99,14 @@ return{
 
 
 // Python AI service sends ticket to Claude API.
-const getUrgencyLevel = (score)=>{
+const getUrgencyLevel = (score: number): "LOW" | "MEDIUM" | "HIGH" =>{
     if (score >80)return "HIGH";
     if (score >40) return "MEDIUM";
     return "LOW";
 };
 
 // browser tab title, admin CSV export.
-const formatTicketLabel =(ticket)=>{
+const formatTicketLabel =(ticket: Ticket): string =>{
     return "[" + ticket.urgency + "#" + ticket.id +"-"+ ticket.subject + "]";
 
 };
@@ -116,26 +117,26 @@ const formatTicketLabel =(ticket)=>{
  
 // Dashboard default view = open tickets only.
 // Resolved tickets go to the archive view.
-const getOpenTickets = (ticketArray)=> {
+const getOpenTickets = (ticketArray: Ticket[]): Ticket[] => {
     return ticketArray.filter((ticket)=> ticket.status === "open");
 };
 
 // Dashboard filter buttons (HIGH / MEDIUM / LOW) call this.
-const getTicketsByUrgency = (ticketArray,urgencyLevel)=>{
+const getTicketsByUrgency = (ticketArray: Ticket[], urgencyLevel: string): Ticket[] =>{
     return ticketArray.filter((ticket)=>ticket.urgency===urgencyLevel);
 };
 
 // map() loops through every item and TRANSFORMS it into
 // something new. Returns a NEW array. Original unchanged.
 // React calls this to turn ticket objects into label strings
-const formatAllTickets= (ticketArray)=> {
+const formatAllTickets= (ticketArray: Ticket[]): string[]=> {
     return ticketArray.map ((ticket)=>formatTicketLabel(ticket));
     // Each ticket object → becomes a formatted string label
 };
 
 // Dashboard header shows: Total | HIGH | MEDIUM | LOW | Open.
 // All five numbers calculated in one call, returned as one object.
-const getTicketStats=(ticketArray)=>{
+const getTicketStats=(ticketArray: Ticket[]): TicketStats=>{
     return{
         total: ticketArray.length,
         high: ticketArray.filter((t)=>t.urgency==="HIGH").length,
@@ -145,6 +146,7 @@ const getTicketStats=(ticketArray)=>{
 
     };
 };
+
 // --- ---------- TEST. -------------
 console.log("── createTicket ──────────────────────────");
 const myTicket = createTicket("Farika","Farika@test.com","Walker wheelchair broken");
@@ -191,7 +193,8 @@ const fetchTickets = async () => {
     return tickets;
   }
   catch (error){
-    console.error("Failed to fetch tickets:", error.message);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Failed to fetch tickets:", message);
     return[];
   }
 
@@ -201,7 +204,7 @@ const fetchTickets = async () => {
 // Clicking a ticket on the dashboard opens the detail view.
 // We only need ONE ticket — not all of them.
 // The .NET backend has a GET /api/tickets/:id endpoint for this.
-const fetchTicketsById = async ()=> {
+const fetchTicketsById = async (ticketId: number)=> {
   try{
     const response = await fetch (`http://localhost:5000/api/tickets/${ticketId}`);
     
@@ -214,7 +217,8 @@ const fetchTicketsById = async ()=> {
   
   }
   catch (error){
-       console.error("Failed to fetch ticket:", error.message);
+       const message = error instanceof Error ? error.message : String(error);
+       console.error("Failed to fetch ticket:",message);
        return null; 
   }
 };
@@ -225,7 +229,7 @@ const fetchTicketsById = async ()=> {
 // The customer portal form calls this when submitted.
 // It sends the ticket data to the .NET backend.
 // The backend saves it to PostgreSQL and returns the saved ticket with a database ID.
-const submitTicket = async (customerName, email, subject)=>{
+const submitTicket = async (customerName: string, email: string, subject: string)=>{
   try{
 
     const ticketData = createTicket (customerName,email,subject);
@@ -256,7 +260,8 @@ const submitTicket = async (customerName, email, subject)=>{
       return savedTicket;
     }
     catch(error){
-      console.error("Failed to submit ticket:", error.message);
+      const message = error instanceof Error ? error.message : String(error);
+      console.error("Failed to submit ticket:", message);
       return null;
     }
   };
@@ -266,7 +271,7 @@ const submitTicket = async (customerName, email, subject)=>{
 // PATCH updates part of an existing record — just the status field.
 // PUT would replace the whole ticket. PATCH only touches what changed.
 
-const updateTicketStatus = async (ticketId,newStatus)=>{
+const updateTicketStatus = async (ticketId: number, newStatus: string)=>{
   try{
     const response= await fetch (`http://localhost:5000/api/tickets/${ticketId}`, {
     method :"PATCH",
@@ -282,7 +287,8 @@ const updateTicketStatus = async (ticketId,newStatus)=>{
   return updated ;
 }
   catch(error){
-       console.log("Failed to update ticket:",error.message);
+       const message = error instanceof Error ? error.message : String(error);
+       console.log("Failed to update ticket:",message);
        return null;
   }
 };

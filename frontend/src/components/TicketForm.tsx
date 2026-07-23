@@ -1,9 +1,16 @@
 import { useState , useEffect} from "react";
 import {createTicket} from "../../ticket-utils"
+import type { Ticket } from "../types/ticket";
 
 // The parent (App.jsx) knows — it adds it to the tickets list.
 // So TicketForm creates the ticket and hands it UP to the parent.
-function TicketForm ({onSubmit}){
+
+interface TicketFormProps {
+  // onSubmit is a function that receives a Ticket and returns nothing.
+ 
+  onSubmit: (ticket: Ticket) => void;
+}
+function TicketForm ({onSubmit}: TicketFormProps){
     const [name, setName]=useState ("");
     const [email, setEmail]=useState ("");
     const [subject, setSubject]=useState ("");
