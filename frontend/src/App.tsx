@@ -1,7 +1,7 @@
 import { useState} from 'react'
 import TicketList from './components/TicketList'
 import TicketForm from './components/TicketForm'
-import {tickets as sampleTickets,getTicketStats} from "../ticket-utils"
+import {tickets as sampleTickets,getTicketStats,sortByDate,sortByUrgency,sortByOrder,sortByStatus} from "../ticket-utils"
 //import './App.css'
 import type { Ticket } from "./types/ticket";
 
@@ -9,11 +9,21 @@ function App() {
   const [tickets, setTickets] = useState(sampleTickets);
   const [filter,setFilter] = useState ("ALL");
   const [view, setView] = useState("dashboard");
+  const [sort, setSort]=useState<"urgency"| "date"|"status">("urgency");
   // Every time filter changes, React re-renders App.
   // visible recalculates automatically — no manual DOM updates needed.
 
-  const visible = filter ==="ALL"
-  ? tickets : tickets.filter (t=>t.urgency === filter);
+  
+// Sorting
+const getSorted= (ticketArray:Ticket[]):Ticket[]=>{
+  if (sort ==="urgency")return sortByUrgency (ticketArray);
+  if (sort ==="date")return sortByDate (ticketArray);
+  if (sort ==="status")return sortByStatus (ticketArray);
+  return ticketArray;
+};
+const visible = getSorted(
+  filter ==="ALL"? tickets:tickets.filter(t=>t.urgency===filter)
+);
 
   const stats = getTicketStats(tickets);
 
@@ -80,12 +90,38 @@ function App() {
         </button>
       ))}
     </div>
+
+     {/*Sort button */}
+   <div style={{display:"flex", gap:"8px", marginBottom:"16px",alignItems:"center"}}>
+    <span style={{fontSize:"13px", color:"#6b7280"}}>Sort:</span>
+    {(["urgency","date","status"]as const).map(s=>(
+      <button
+      key={s}
+      onClick={()=>setSort(s)}
+      style={{
+        padding:"5px 12px",borderRadius:"20px",
+        border:"1px solod #ccc", fontSize:"12px",
+        background:sort === s? "#1d4ed8":"white",
+        cursor:"pointer"
+      }}
+      >
+      {s ==="urgency"?"By urgency": s === "date"? "By date":"Open first"}
+
+      </button>
+    ))}
+   </div>
+   
     {/*Ticket list- passes filtered tickets down as props*/}
     <TicketList tickets={visible}/>
     </>
     )}
    </div>
+
   );
+
+  
+
 }
+
 
 export default App;

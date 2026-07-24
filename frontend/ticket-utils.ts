@@ -304,4 +304,29 @@ const updateTicketStatus = async (ticketId: number, newStatus: string)=>{
 // console.log("── submitTicket ──────────────────────────");
 // submitTicket("Farika", "farika@test.com", "Test ticket")
 //   .then(saved => console.log("Saved:", saved));
-export { tickets, createTicket,getOpenTickets, getTicketStats, formatAllTickets, getTicketsByUrgency };
+
+// -------------- SORTING --------------------
+// BY URGENCY LEVEL
+const urgencyOrder: Record<string, number> = {HIGH:0, MEDIUM:1, LOW:2};
+const sortByUrgency= (ticketArray:Ticket[]):Ticket[]=>{
+return [...ticketArray].sort(
+  (a,b) => urgencyOrder[a.urgency]- urgencyOrder[b.urgency]
+);
+};
+
+//BY DATE
+const sortByDate = (ticketArray: Ticket[]):Ticket[]=>{
+  return [...ticketArray].sort(
+    (a,b)=> new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+};
+
+// By STATUS
+const sortByStatus= (ticketArray: Ticket[]):Ticket[]=>{
+  return[...ticketArray].sort((a,b)=>{
+    if (a.status==="open" && b.status==="resolved")return -1;
+    if (a.status==="resolved" && b.status==="open")return -1;
+    return 0
+  });
+};
+export { tickets, createTicket,getOpenTickets, getTicketStats, formatAllTickets, getTicketsByUrgency,sortByDate,sortByUrgency,sortByStatus };
