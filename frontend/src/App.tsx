@@ -1,16 +1,21 @@
-import { useState} from 'react'
+import { useState,useRef} from 'react'
 import TicketList from './components/TicketList'
 import TicketForm from './components/TicketForm'
-import {tickets as sampleTickets,getTicketStats,sortByDate,sortByUrgency,searchTickets,sortByStatus} from "../ticket-utils"
+import {tickets as sampleTickets,getTicketStats,sortByDate,sortByUrgency,searchTickets,sortByStatus,TicketQueue} from "../ticket-utils"
 //import './App.css'
 import type { Ticket } from "./types/ticket";
 
+// useState triggers a re-render every time it changes.
+// useRef holds a value between renders WITHOUT causing re-renders.
 function App() {
   const [tickets, setTickets] = useState(sampleTickets);
   const [filter,setFilter] = useState ("ALL");
   const [view, setView] = useState("dashboard");
   const [sort, setSort]=useState<"urgency"| "date"|"status">("urgency");
   const [query, setQuery] = useState<string>("");
+  const triageQueue = useRef(new TicketQueue());
+  const [ queueSize, setQueueSize]=useState<number> (0);
+  const [ lastProcessed, setLastProcessed]= useState<Ticket | null>(null);
   // Every time filter changes, React re-renders App.
   // visible recalculates automatically — no manual DOM updates needed.
 
@@ -40,6 +45,21 @@ const visible = getSorted(
     setView("dashboard");
   }, 20000);
   };
+
+  // Add ticket to AI triage queue
+  const addToQueue = (ticket:Ticket)=>{
+    triageQueue.current.enqueue(ticket);
+    setQueueSize(triageQueue.current.size);
+  };
+  // Process next ticket from queue (simulate AI triage)
+  const processNext=() =>{
+    const ticket = triageQueue.current.dequeue();
+    if(ticket){
+      setLastProcessed(ticket);
+      setQueueSize(triageQueue.current.size)
+    }
+  };
+
 
   return (
     <div style={{ maxWidth: "640px", margin: "0 auto", padding: "20px", fontFamily: "sans-serif" }}>
@@ -139,6 +159,45 @@ const visible = getSorted(
 
     {/*Ticket list- passes filtered tickets down as props*/}
     <TicketList tickets={visible}/>
+    {/* AI Triage Queue */}
+    <div
+    style ={{marginTop:"24px", background:"#f8fafc", border:" 1px solid #e2e8f0", borderRadius:"12px", padding:"16px"}}>
+    <h3 style={{fontSize:"15px", fontWeight:"600", marginBottom:"12px",color:"#1d44d8"}}>
+      AI Triage Queue
+    </h3>
+    
+    <div style={{display:"flex",gap:"8px",marginBottom:"12px", flexWrap:"wrap"}}>
+    <button
+    onClick={()=>
+    {
+      const openTickets= tickets.filter (t=>t.status === "open");
+      if (openTickets.length >0) addToQueue(openTickets[0]);
+    }
+    }
+    style={{padding:"8px 14px", borderRadius:"8px",border:"1px solid #d1d5db", background:"white",cursor:"pointer",fontSize:"13px"}}
+    >
+      Add ticket to queue +
+    </button>
+    
+    <button
+    onClick={processNext}
+    style={{padding:"8px 14px", borderRadius:"8px", border:"none", background:"#1d4ed8", color: "white", cursor:"pointer", fontSize:"13px"}}
+    >
+      Process next ▶
+    </button>
+    </div>
+
+    <div style={{fontSize:"13px", color:"#374151"}}>
+      <span style={{marginRight:"16px"}}>
+        Waiting:<strong>{queueSize}</strong>
+      </span>
+      {lastProcessed && (
+        <span style ={{color:"#15803d"}}>
+          Last Processed:<strong>[{lastProcessed.urgency}]#{lastProcessed.id}-{lastProcessed.customer}</strong>
+        </span>
+      )}
+    </div>
+    </div>
     </>
     )}
    </div>

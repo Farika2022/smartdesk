@@ -342,4 +342,39 @@ const searchTickets = (ticketArray: Ticket[],query:string): Ticket[]=>{
   ticket.id.toString().includes(q)
   );
 };
-export { tickets, createTicket,getOpenTickets, getTicketStats, formatAllTickets, getTicketsByUrgency,sortByDate,sortByUrgency,sortByStatus,searchTickets };
+
+// ------------- QUEUE AI TRIAGE PROCESSING -----------------
+class TicketQueue{
+  // private means only methods inside this class can touch queue.
+  // External code cannot randomly push or splice items.
+  private queue: Ticket[]=[];
+  enqueue (ticket:Ticket):void{
+    this.queue.push(ticket);
+    console.log(`Ticket #${ticket.id} joined the queue. Position: ${this.queue.length}`);
+  }
+  dequeue ():Ticket | undefined{
+    if (this.isEmpty()){
+      console.log("Queue is empty - nothing to process.");
+      return undefined;
+    }
+    const ticket = this.queue.shift();
+    console.log (`processing ticket #${ticket?.id}- ${ticket?.subject}`);
+    return ticket;
+  }
+  // peek() — look at the next ticket WITHOUT removing it
+  peek():Ticket| undefined{
+    return this.queue[0];
+  }
+  // isEmpty() — check if there is anything to process
+  isEmpty(): boolean {
+    return this.queue.length===0;
+  } 
+  // size — how many tickets are waiting
+  get size(): number{
+    return this.queue.length;
+  }
+  getAll():Ticket[]{
+    return [...this.queue];
+  }
+}
+export { tickets, createTicket,getOpenTickets, getTicketStats, formatAllTickets, getTicketsByUrgency,sortByDate,sortByUrgency,sortByStatus,searchTickets ,TicketQueue};
