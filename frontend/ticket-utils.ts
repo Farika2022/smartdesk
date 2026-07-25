@@ -329,4 +329,17 @@ const sortByStatus= (ticketArray: Ticket[]):Ticket[]=>{
     return 0
   });
 };
-export { tickets, createTicket,getOpenTickets, getTicketStats, formatAllTickets, getTicketsByUrgency,sortByDate,sortByUrgency,sortByStatus };
+
+// ------------------ SEARCHING ---------------------
+const searchTickets = (ticketArray: Ticket[],query:string): Ticket[]=>{
+  //trim(): Remove accidental spaces the user typed.
+  //toLowerCase(): Make search case-insensitive.
+  const q = query.toLowerCase().trim();
+  if (q==="") return ticketArray;
+  return ticketArray.filter((ticket)=>
+  ticket.customer.toLowerCase().includes(q) ||
+  ticket.subject.toLowerCase().includes(q) ||
+  ticket.id.toString().includes(q)
+  );
+};
+export { tickets, createTicket,getOpenTickets, getTicketStats, formatAllTickets, getTicketsByUrgency,sortByDate,sortByUrgency,sortByStatus,searchTickets };

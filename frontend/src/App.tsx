@@ -1,7 +1,7 @@
 import { useState} from 'react'
 import TicketList from './components/TicketList'
 import TicketForm from './components/TicketForm'
-import {tickets as sampleTickets,getTicketStats,sortByDate,sortByUrgency,sortByOrder,sortByStatus} from "../ticket-utils"
+import {tickets as sampleTickets,getTicketStats,sortByDate,sortByUrgency,searchTickets,sortByStatus} from "../ticket-utils"
 //import './App.css'
 import type { Ticket } from "./types/ticket";
 
@@ -10,6 +10,7 @@ function App() {
   const [filter,setFilter] = useState ("ALL");
   const [view, setView] = useState("dashboard");
   const [sort, setSort]=useState<"urgency"| "date"|"status">("urgency");
+  const [query, setQuery] = useState<string>("");
   // Every time filter changes, React re-renders App.
   // visible recalculates automatically — no manual DOM updates needed.
 
@@ -21,8 +22,10 @@ const getSorted= (ticketArray:Ticket[]):Ticket[]=>{
   if (sort ==="status")return sortByStatus (ticketArray);
   return ticketArray;
 };
+const searched =searchTickets(tickets,query);
+const filtered= filter === "ALL" ? searched : searched.filter(t => t.urgency === filter);
 const visible = getSorted(
-  filter ==="ALL"? tickets:tickets.filter(t=>t.urgency===filter)
+  filtered
 );
 
   const stats = getTicketStats(tickets);
@@ -76,6 +79,29 @@ const visible = getSorted(
     ))}
     </div>
 
+    {/*Search bar */}
+    <div style={{marginBottom:"16px"}}>
+      <input
+      type ="text"
+      value={query}
+      onChange={(e)=>setQuery(e.target.value)}
+      placeholder="Search by name,issue, or ticket ID"
+      style={{
+        width:"100%",
+        padding:"10px 14px", 
+        borderRadius:"8px", 
+        border:"1px solid #d1d5db", 
+        fontSize:"14px",
+        boxSizing: "border-box" as const,
+      }}
+/>
+{query && (
+  <div style ={{fontSize:"12px", color:"#6b7280", marginTop:"6px"}}>
+    {visible.length}ticket{visible.length !== 1? "s":""} found for "{query}"
+    </div>
+)}
+    </div>
+
     {/* Filter buttons */}
     <div style ={{display:"flex", gap :"8px", marginBottom:"16px"}}>
       {["ALL", "HIGH", "MEDIUM", "LOW"]. map(f => (
@@ -110,7 +136,7 @@ const visible = getSorted(
       </button>
     ))}
    </div>
-   
+
     {/*Ticket list- passes filtered tickets down as props*/}
     <TicketList tickets={visible}/>
     </>
