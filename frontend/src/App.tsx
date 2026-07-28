@@ -1,14 +1,19 @@
-import { useState,useRef} from 'react'
+import { useState,useRef,useEffect} from 'react'
 import TicketList from './components/TicketList'
 import TicketForm from './components/TicketForm'
-import {tickets as sampleTickets,getTicketStats,sortByDate,sortByUrgency,searchTickets,sortByStatus,TicketQueue} from "../ticket-utils"
-//import './App.css'
+import {
+  getTicketStats, fetchTickets, submitTicket,
+  sortByUrgency, sortByDate, sortByStatus,
+  searchTickets, TicketQueue
+} from "../ticket-utils";
 import type { Ticket } from "./types/ticket";
 
 // useState triggers a re-render every time it changes.
 // useRef holds a value between renders WITHOUT causing re-renders.
 function App() {
-  const [tickets, setTickets] = useState(sampleTickets);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+const [loading, setLoading] = useState<boolean>(true);
+const [apiError, setApiError] = useState<string>("");
   const [filter,setFilter] = useState ("ALL");
   const [view, setView] = useState("dashboard");
   const [sort, setSort]=useState<"urgency"| "date"|"status">("urgency");
@@ -19,7 +24,27 @@ function App() {
   // Every time filter changes, React re-renders App.
   // visible recalculates automatically — no manual DOM updates needed.
 
-  
+  useEffect(() => {
+
+  const loadTickets = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchTickets();
+      setTickets(data);
+    } catch (error) {
+      setApiError("Could not connect to the server. Using offline mode.");
+    } finally {
+      
+      // finally runs whether the try succeeded or failed.
+     
+      setLoading(false);
+    }
+  };
+
+  loadTickets();
+}, []); // [] = run once when component first appears
+
+
 // Sorting
 const getSorted= (ticketArray:Ticket[]):Ticket[]=>{
   if (sort ==="urgency")return sortByUrgency (ticketArray);
@@ -38,12 +63,29 @@ const visible = getSorted(
   // TicketForm calls onSubmit(newTicket) when submitted.
   // This function receives that ticket and adds it to the array.
 
-  const handleNewTicket = (newTicket:Ticket) => {
-    setTickets([...tickets, newTicket]);
-   // setView("dashboard"); // switch back to dashboard after submit
-    setTimeout(() => {
-    setView("dashboard");
-  }, 20000);
+  const handleNewTicket = async(newTicket:Ticket) => {
+    try {
+   
+    // submitTicket() sends the ticket to POST /api/tickets.
+    // The .NET backend saves it and returns it with a real server ID.
+    // We use the saved ticket (with real ID) not the local one.
+    const saved = await submitTicket(
+      newTicket.customer,
+      newTicket.email,
+      newTicket.subject
+    );
+
+    if (saved) {
+      
+      // Add the server-returned ticket (with real ID) to the list.
+      // This keeps React state in sync with the database.
+      setTickets([...tickets, saved]);
+    }
+  } catch (error) {
+    console.error("Failed to submit ticket:", error);
+  }
+
+  setTimeout(() => setView("dashboard"), 20000);
   };
 
   // Add ticket to AI triage queue
@@ -156,6 +198,19 @@ const visible = getSorted(
       </button>
     ))}
    </div>
+
+  {/* API error state */}
+{apiError && (
+  <div style={{ background: "#fef2f2", border: "1px solid #fca5a5",
+    borderRadius: "8px", padding: "12px", marginBottom: "16px",
+    color: "#b91c1c", fontSize: "14px" }}>
+    {apiError}
+  </div>
+)}
+
+{/* Only show list when not loading */}
+{!loading && <TicketList tickets={visible} />}
+
 
     {/*Ticket list- passes filtered tickets down as props*/}
     <TicketList tickets={visible}/>

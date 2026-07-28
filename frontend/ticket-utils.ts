@@ -377,4 +377,8 @@ class TicketQueue{
     return [...this.queue];
   }
 }
-export { tickets, createTicket,getOpenTickets, getTicketStats, formatAllTickets, getTicketsByUrgency,sortByDate,sortByUrgency,sortByStatus,searchTickets ,TicketQueue};
+export { tickets, createTicket, getOpenTickets, getTicketStats,
+         formatAllTickets, getTicketsByUrgency,
+         sortByUrgency, sortByDate, sortByStatus,
+         searchTickets, TicketQueue,
+         fetchTickets, submitTicket, updateTicketStatus };
