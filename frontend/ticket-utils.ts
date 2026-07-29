@@ -184,7 +184,7 @@ console.log(getTicketStats(tickets));
 
 const fetchTickets = async () => {
   try {
-    const response = await fetch ("http://localhost:5000/api/tickets");
+    const response = await fetch ("http://localhost:5056/api/tickets");
     
     if (!response.ok){
       throw new Error ("Server error:" + response.status);
@@ -206,7 +206,7 @@ const fetchTickets = async () => {
 // The .NET backend has a GET /api/tickets/:id endpoint for this.
 const fetchTicketsById = async (ticketId: number)=> {
   try{
-    const response = await fetch (`http://localhost:5000/api/tickets/${ticketId}`);
+    const response = await fetch (`http://localhost:5056/api/tickets/${ticketId}`);
     
     if (!response.ok){
       throw new Error ("Ticket not found:" + ticketId);
@@ -233,7 +233,7 @@ const submitTicket = async (customerName: string, email: string, subject: string
   try{
 
     const ticketData = createTicket (customerName,email,subject);
-    const response = await fetch ("http://localhost:5000/api/tickets",{
+    const response = await fetch ("http://localhost:5056/api/tickets",{
        
       // Default fetch method is GET. Must explicitly set POST.
       method:"POST",
@@ -273,7 +273,7 @@ const submitTicket = async (customerName: string, email: string, subject: string
 
 const updateTicketStatus = async (ticketId: number, newStatus: string)=>{
   try{
-    const response= await fetch (`http://localhost:5000/api/tickets/${ticketId}`, {
+    const response= await fetch (`http://localhost:5056/api/tickets/${ticketId}`, {
     method :"PATCH",
      headers:{
         "Content-Type":"application/json",
