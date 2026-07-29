@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SmartDesk.Api.Models;
+using Microsoft.EntityFrameworkCore;
+using SmartDesk.Api.Data;
 
 namespace SmartDesk.Api.Controllers;
 
@@ -16,44 +18,48 @@ namespace SmartDesk.Api.Controllers;
 [Route("api/[controller]")]
 public class TicketsController : ControllerBase
 {
-private static List<Ticket> _tickets = new List<Ticket>
-{
-    new Ticket { Id = 10001, Customer = "Lars Nielsen", Email = "lars@example.com",
-            Subject = "Front wheel is making a grinding noise",
-            Status = "open", Urgency = "HIGH",
-            CreatedAt = DateTime.UtcNow.AddDays(-3) },
 
-        new Ticket { Id = 10002, Customer = "Sofia Berg", Email = "sofia@example.com",
-            Subject = "Invoice shows wrong VAT amount",
-            Status = "open", Urgency = "LOW",
-            CreatedAt = DateTime.UtcNow.AddDays(-2) },
+     // _context is the database connection.
+    // readonly = it is set once in the constructor and never changed.
+    private readonly SmartDeskContext _context;
 
-        new Ticket { Id = 10003, Customer = "Mikkel Holm", Email = "mikkel@example.com",
-            Subject = "Battery not charging past 40 percent",
-            Status = "resolved", Urgency = "MEDIUM",
-            CreatedAt = DateTime.UtcNow.AddDays(-1) },
-};
-
-private static int _nextId= 1004;
+   // .NET automatically passes SmartDeskContext here.
+   // This is dependency injection — never create _context manually.
+   // .NET creates it, manages the connection, and disposes it after the request.
+   public TicketsController(SmartDeskContext context)
+   {
+    _context = context;
+   }
 
 
     // [HttpGet]=> Tells .NET: this method handles GET requests to /api/tickets.
     // Returns all tickets as a JSON array.
     // IActionResult = the method can return different response types
 [HttpGet]
-public IActionResult GetAll()
+public async Task< IActionResult >GetAll()
 {
+    // Fetches all tickets from the database asynchronously.
+    // Same as SQL: SELECT * FROM "Tickets"
+
+    var tickets = await _context.Tickets.ToListAsync();
     // Ok() returns HTTP 200 with the data as JSON.
-    return Ok(_tickets);
+    return Ok(tickets);
 }
+
  // This is a route parameter. /api/tickets/10001 sets id = 10001.
 // .NET automatically extracts it and passes it to the method.
 [HttpGet("{id}")]
-public IActionResult GetById (int id)
+public async Task<IActionResult> GetById (int id)
 {
+
+  
     //FirstOrDefault=> Searches the list for a ticket with matching ID.
     // Returns the ticket if found, null if not found.
-    var ticket = _tickets.FirstOrDefault(t=>t.Id==id);
+   // var ticket = _tickets.FirstOrDefault(t=>t.Id==id);
+
+   // Finds a ticket by primary key — O(1) lookup via index.
+  // Same as SQL: SELECT * FROM "Tickets" WHERE "Id" = id
+    var ticket = await _context.Tickets.FindAsync(id);
 
     if (ticket==null) return NotFound();
     return Ok(ticket);
@@ -62,7 +68,7 @@ public IActionResult GetById (int id)
     //  [HttpPost] => Handles POST requests — creating a new ticket.
     // Called when a customer submits the form in React.
     [HttpPost]
-    public IActionResult Create ([FromBody]Ticket ticket)
+    public async Task< IActionResult> Create ([FromBody]Ticket ticket)
     {
         // .NET automatically validates the incoming data.
          // This is the server-side validation layer.
@@ -70,21 +76,24 @@ public IActionResult GetById (int id)
          if (!ModelState.IsValid) return BadRequest (ModelState);
 
          // The server controls these to prevent manipulation.
-         ticket.Id= _nextId++;
+         //  ticket.Id= _nextId++;
          ticket.CreatedAt =DateTime.UtcNow;
 
-         _tickets.Add(ticket);
+         _context.Tickets.Add(ticket);
+ 
+        // THIS is when data is actually written to PostgreSQL.
+        await _context.SaveChangesAsync();
 
-         // Returns HTTP 201 Created — the correct response for a new resource.
-         return CreatedAtAction (nameof (GetById), new {id = ticket.Id}, ticket);
-    }
+        return CreatedAtAction(nameof(GetById), new { id = ticket.Id }, ticket);
+
+   }
 
      // PATCH /api/tickets/{id}
      // PATCH updates only specific fields — just the status here.
      [HttpPatch("{id}")]
-     public IActionResult UpdateStatus (int id, [FromBody]UpdateStatusRequest request)
+     public async Task<IActionResult> UpdateStatus (int id, [FromBody]UpdateStatusRequest request)
      {
-        var ticket= _tickets.FirstOrDefault(t=>t.Id == id);
+        var ticket= await _context.Tickets.FindAsync(id);
         if (ticket==null) return NotFound();
 
         ticket.Status=request.Status;

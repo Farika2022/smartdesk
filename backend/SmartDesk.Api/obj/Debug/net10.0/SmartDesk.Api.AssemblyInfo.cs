@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SmartDesk.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7293e1cc305f3819470ef1e387f6a95802e294c3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+55d829c00edaadd22664f407c517498607b2d42b")]
 [assembly: System.Reflection.AssemblyProductAttribute("SmartDesk.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SmartDesk.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
