@@ -1,7 +1,9 @@
 
  using SmartDesk.Api.Data;
  using Microsoft.EntityFrameworkCore;
- 
+ using Microsoft.AspNetCore.Authentication.JwtBearer;
+ using Microsoft.IdentityModel.Tokens;
+ using System.Text;
 // WebApplication.CreateBuilder => sets up everything .NET needs to run:
 // dependency injection, configuration, logging.
 // builder = the setup phase. app = the running phase.
@@ -12,6 +14,23 @@ var builder = WebApplication.CreateBuilder(args);
 // Without this, TicketsController is never discovered.
 builder.Services.AddControllers();
 
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer=true,
+                ValidateAudience=true,
+                ValidateLifetime=true,
+                ValidateIssuerSigningKey=true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience= builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+                )
+            };
+    });
 
 // AddDbContext => Registers SmartDeskContext with dependency injection.
 // Every controller that needs the DB gets it automatically.
@@ -41,10 +60,12 @@ var app = builder.Build();
 //  UseCors before MapControllers => Middleware runs in order. CORS must be checked before
 // the request reaches the controller. Order matters in .NET.
 app.UseCors("AllowReact");
-
+app.UseAuthentication();
+app.UseAuthorization();
 // MapControllers => Connects the URL routes to the controller methods.
 // GET /api/tickets → TicketsController.GetAll()
 // Without this, the endpoints never get registered.
 app.MapControllers();
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.Run();

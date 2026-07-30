@@ -25,6 +25,7 @@ public class SmartDeskContext: DbContext
         // DbSet<Ticket> = the tickets table.
 
         public DbSet<Ticket> Tickets {get;set;}
+        public DbSet<User> Users {get;set;}
 
         //OnModelCreating => Customise how Entity Framework maps models to tables.
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -62,5 +63,15 @@ public class SmartDeskContext: DbContext
             }
                 
             );
+
+        modelBuilder.Entity <User>().HasData(
+            new User
+            {
+                Id = 1,
+                Email = "staff@smartdesk.com",
+                PasswordHash = "$2b$12$A.3RKBS0s/IlMceFJOGoPOdxdwPhbM.RFs7yHfuXJKFQE1jYmRkgu",
+                Role = "staff"
+            }
+         );
         }
 }

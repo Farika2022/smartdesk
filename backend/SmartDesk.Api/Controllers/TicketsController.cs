@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using SmartDesk.Api.Models;
 using Microsoft.EntityFrameworkCore;
 using SmartDesk.Api.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SmartDesk.Api.Controllers;
 
@@ -9,7 +10,7 @@ namespace SmartDesk.Api.Controllers;
 // Enables automatic request validation, model binding,
 // and proper error responses. Always add this to API controllers.
 
-
+[Authorize]
 [ApiController]
 
 //[Route("api/[controller]")]=> Sets the URL prefix for all endpoints in this controller.

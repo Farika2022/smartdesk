@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SmartDesk.Api.Data;
@@ -11,9 +12,11 @@ using SmartDesk.Api.Data;
 namespace SmartDesk.Api.Migrations
 {
     [DbContext(typeof(SmartDeskContext))]
-    partial class SmartDeskContextModelSnapshot : ModelSnapshot
+    [Migration("20260730161248_AddUsersTable")]
+    partial class AddUsersTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -119,7 +122,7 @@ namespace SmartDesk.Api.Migrations
                         {
                             Id = 1,
                             Email = "staff@smartdesk.com",
-                            PasswordHash = "$2b$12$A.3RKBS0s/IlMceFJOGoPOdxdwPhbM.RFs7yHfuXJKFQE1jYmRkgu",
+                            PasswordHash = "$2a$11$rBnNmMDDqMKRRSSgLBMxuuWfhGXEzGPXcFJQjhIlkVpkHqIQJE5Zy",
                             Role = "staff"
                         });
                 });
