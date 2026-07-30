@@ -16,14 +16,14 @@ function TicketForm ({onSubmit}: TicketFormProps){
     const [subject, setSubject]=useState ("");
     const [error, setError]=useState ("");
     const [submitted, setSubmitted]=useState (false);
-    const [countdown, setCountdown] = useState(20);
+    const [countdown, setCountdown] = useState(10);
 
     useEffect(() => {
             if (!submitted) return;
             const interval = setInterval(() => {
                 setCountdown(prev => prev - 1);
             }, 1000);
-            setTimeout(() => clearInterval(interval), 20000);
+            setTimeout(() => clearInterval(interval), 10000);
             return () => clearInterval(interval);
             }, [submitted]);
 
@@ -55,7 +55,7 @@ function TicketForm ({onSubmit}: TicketFormProps){
 
          setTimeout(() => {
          setSubmitted(false);
-        }, 20000); // 20000 milliseconds = 20 seconds
+        }, 10000); // 10000 milliseconds = 10 seconds
     };
     // Successfully form submission message
 

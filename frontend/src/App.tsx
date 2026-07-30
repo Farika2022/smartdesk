@@ -85,7 +85,7 @@ const visible = getSorted(
     console.error("Failed to submit ticket:", error);
   }
 
-  setTimeout(() => setView("dashboard"), 20000);
+  setTimeout(() => setView("dashboard"), 10000);
   };
 
   // Add ticket to AI triage queue
