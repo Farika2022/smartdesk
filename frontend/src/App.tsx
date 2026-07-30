@@ -7,12 +7,14 @@ import {
   searchTickets, TicketQueue
 } from "../ticket-utils";
 import type { Ticket } from "./types/ticket";
+import LoginPage from "./components/LoginPage";
 
 // useState triggers a re-render every time it changes.
 // useRef holds a value between renders WITHOUT causing re-renders.
 function App() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
 const [loading, setLoading] = useState<boolean>(true);
+const [token, setToken] = useState<string>("");
 const [apiError, setApiError] = useState<string>("");
   const [filter,setFilter] = useState ("ALL");
   const [view, setView] = useState("dashboard");
@@ -21,25 +23,28 @@ const [apiError, setApiError] = useState<string>("");
   const triageQueue = useRef(new TicketQueue());
   const [ queueSize, setQueueSize]=useState<number> (0);
   const [ lastProcessed, setLastProcessed]= useState<Ticket | null>(null);
+  
+  const handleLogin = (newToken: string) => {
+  setToken(newToken);
+};
+
+
   // Every time filter changes, React re-renders App.
   // visible recalculates automatically — no manual DOM updates needed.
 
   useEffect(() => {
 
   const loadTickets = async () => {
-    try {
-      setLoading(true);
-      const data = await fetchTickets();
-      setTickets(data);
-    } catch (error) {
-      setApiError("Could not connect to the server. Using offline mode.");
-    } finally {
-      
-      // finally runs whether the try succeeded or failed.
-     
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    const data = await fetchTickets(token); // pass token here
+    setTickets(data);
+  } catch (error) {
+    setApiError("Could not connect to server.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   loadTickets();
 }, []); // [] = run once when component first appears
@@ -88,6 +93,7 @@ const visible = getSorted(
   setTimeout(() => setView("dashboard"), 10000);
   };
 
+  
   // Add ticket to AI triage queue
   const addToQueue = (ticket:Ticket)=>{
     triageQueue.current.enqueue(ticket);
@@ -102,8 +108,11 @@ const visible = getSorted(
     }
   };
 
-
+  if (!token) {
+  return <LoginPage onLogin={handleLogin} />;
+}
   return (
+    
     <div style={{ maxWidth: "640px", margin: "0 auto", padding: "20px", fontFamily: "sans-serif" }}>
      
       {/* Navigation */}

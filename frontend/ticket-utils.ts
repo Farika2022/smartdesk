@@ -182,9 +182,11 @@ console.log(getTicketStats(tickets));
 // must mark a function async before using await inside it 
 // Without async , JS throws : "await is only valid in async functions"
 
-const fetchTickets = async () => {
+const fetchTickets = async (token: string) : Promise<Ticket[]>  => {
   try {
-    const response = await fetch ("http://localhost:5056/api/tickets");
+    const response = await fetch("http://localhost:5056/api/tickets", {
+  headers: { "Authorization": `Bearer ${token}` }
+});
     
     if (!response.ok){
       throw new Error ("Server error:" + response.status);
