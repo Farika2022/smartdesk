@@ -68,4 +68,11 @@ app.UseAuthorization();
 app.MapControllers();
 app.UseAuthentication();
 app.UseAuthorization();
+// Railway does not have a terminal to run dotnet ef manually.
+// This applies any pending migrations automatically when the app starts.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<SmartDeskContext>();
+    db.Database.Migrate();
+}
 app.Run();
