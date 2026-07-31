@@ -18,6 +18,6 @@ COPY --from=build /app/out .
 # WHY PORT environment variable?
 # Railway assigns a random port. We must listen on it.
 # This tells .NET to use whatever port Railway provides.
-ENV ASPNETCORE_URLS=http://+:$PORT
+ENV ASPNETCORE_URLS=http://+:${PORT:-8080}
 
 ENTRYPOINT ["dotnet", "SmartDesk.Api.dll"]
