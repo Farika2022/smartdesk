@@ -108,9 +108,9 @@ const visible = getSorted(
     }
   };
 
-  if (!token) {
-  return <LoginPage onLogin={handleLogin} />;
-}
+  //if (!token) {
+  //return <LoginPage onLogin={handleLogin} />;
+//}
   return (
     
     <div style={{ maxWidth: "640px", margin: "0 auto", padding: "20px", fontFamily: "sans-serif" }}>

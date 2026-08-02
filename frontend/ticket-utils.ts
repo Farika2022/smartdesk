@@ -6,7 +6,7 @@
 // ============================================================
 
 import type { Ticket, TicketStats } from "./src/types/ticket";
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5056";
 // --- VARIABLES ---
 // CAPITALS = a global rule for the whole app.
 const URGENCY_LEVELS = ["LOW", "MEDIUM", "HIGH"];
@@ -206,22 +206,22 @@ const fetchTickets = async (token: string) : Promise<Ticket[]>  => {
 // Clicking a ticket on the dashboard opens the detail view.
 // We only need ONE ticket — not all of them.
 // The .NET backend has a GET /api/tickets/:id endpoint for this.
-const fetchTicketsById = async (ticketId: number)=> {
-  try{
-    const response = await fetch (`http://localhost:5056/api/tickets/${ticketId}`);
-    
-    if (!response.ok){
-      throw new Error ("Ticket not found:" + ticketId);
+const fetchTicketById = async (ticketId: number) => {
+  try {
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5056";
+    const response = await fetch(`${API_URL}/api/tickets/${ticketId}`);
+
+    if (!response.ok) {
+      throw new Error("Ticket not found: " + ticketId);
     }
 
-    const ticket= await response.json();
-    return ticket; // a single ticket object, not an array
-  
-  }
-  catch (error){
-       const message = error instanceof Error ? error.message : String(error);
-       console.error("Failed to fetch ticket:",message);
-       return null; 
+    const ticket = await response.json();
+    return ticket;
+
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Failed to fetch ticket:", message);
+    return null;
   }
 };
 
