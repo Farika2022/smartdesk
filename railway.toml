@@ -1,0 +1,6 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "backend/SmartDesk.Api/Dockerfile"
+
+[deploy]
+startCommand = "dotnet SmartDesk.Api.dll"
