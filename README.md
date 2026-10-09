@@ -1,7 +1,6 @@
 # SmartDesk 🎫
 
-SmartDesk is a customer support ticketing app for a company that sells electric
-wheelchairs and walkers. Customers submit support tickets, and an AI
+SmartDesk is a customer support ticketing app. Customers submit support tickets, and an AI
 automatically figures out how urgent each one is — so staff can deal with
 safety issues first instead of digging through a pile of tickets by hand.
 
